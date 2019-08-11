@@ -1,51 +1,52 @@
 <!DOCTYPE html>
 <html lang="fr">
 
-<head>
-    <meta charset="utf-8">
-    <title>Patobeur 421!</title>
-    <meta name="viewport" content="width=device-width">
-    <link rel="icon" href="favicon.ico" />
-    <link href="css/css.css" rel="stylesheet" type="text/css" />
-    <script src="js/js.js"></script>
-</head>
+    <head>
+        <meta charset="utf-8">
+        <title>Patobeur 421!</title>
+        <meta name="viewport" content="width=device-width">
+        <link rel="icon" href="favicon.ico" />
+        <link href="css/flexible.css" rel="stylesheet" type="text/css" />
+        <link href="css/css.css" rel="stylesheet" type="text/css" />
+        <script src="js/js.js"></script>
+    </head>
 
-<body onload="init()">
-    <div id="PAGE">
-        <div id="container">
-            <header>
-                <nav class="nav" role="navigation">
-                    <ul class="menu">
-                        <li class="nom-app"><a href="#">421!</a></li>
-                        <li class="has-children options"><a href="#">&#8801;</a>
-                            <!-- sous menu-->
-                            <ul class="sous-menu">
-                                <li onclick="plusgrand()"><a href="#">Dés plus grands (+)</a></li>
-                                <li onclick="pluspetit()"><a href="#">Dés plus petit (-)</a></li>
-                                <li class="has-children"><a href="#">Options du jeu</a>
-                                    <!-- un sous menu dans un sous-menu-->
-                                    <ul class="sous-menu">
-                                        <li onclick="aff_nb_joueurs()"><a href="#">Nb joueurs</a></li>
-                                        <li onclick="aff_nb_faces()"><a href="#">Nb faces par dés</a></li>
-                                        <li onclick="aff_nb_faces()"><a href="#">Nb dés par lancer</a></li>
-                                    </ul>
-                                    <!-- /un sous menu dans un sous-menu-->
-                                </li>
-                                <li><a href="#">Ouat Ailse !</a></li>
-                            </ul>
-                            <!-- /sous menu-->
-                        </li>
-                    </ul>
-                </nav>
-            </header>
-            <div id="titre"></div>
-            <div id="bouton"></div>
-            <div id="des"></div>
-            <div id="nbcoups"></div>
-            <div id="commentaires"></div>
-            <div id="cartouches"></div>
+    <body onload="init()">
+        <div id="PAGE">
+            <div id="container">
+                <header>
+                    <nav class="nav" role="navigation">
+                        <ul class="menu">
+                            <li class="nom-app"><a href="#">421!</a></li>
+                            <li class="has-children options"><a href="#">&#8801;</a>
+                                <!-- sous menu-->
+                                <ul class="sous-menu">
+                                    <li onclick="plusgrand()"><a href="#">Dés plus grands (+)</a></li>
+                                    <li onclick="pluspetit()"><a href="#">Dés plus petit (-)</a></li>
+                                    <li class="has-children"><a href="#">Options du jeu</a>
+                                        <!-- un sous menu dans un sous-menu-->
+                                        <ul class="sous-menu">
+                                            <li onclick="aff_nb_joueurs()"><a href="#">Nb joueurs</a></li>
+                                            <li onclick="aff_nb_faces()"><a href="#">Nb faces par dés</a></li>
+                                            <li onclick="aff_nb_faces()"><a href="#">Nb dés par lancer</a></li>
+                                        </ul>
+                                        <!-- /un sous menu dans un sous-menu-->
+                                    </li>
+                                    <li><a href="#">Ouat Ailse !</a></li>
+                                </ul>
+                                <!-- /sous menu-->
+                            </li>
+                        </ul>
+                    </nav>
+                </header>
+                <div id="titre"></div>
+                <div id="bouton"></div>
+                <div id="des"></div>
+                <div id="nbcoups"></div>
+                <div id="commentaires"></div>
+                <div id="cartouches"></div>
+            </div>
         </div>
-    </div>
-</body>
+    </body>
 
 </html>
