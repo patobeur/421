@@ -12,13 +12,27 @@ import {
 } from "./dicemanager.js";
 
 let diceList = [];
-window.diceList = diceList; // Make it globally accessible for AI
 let world, renderer, camera, scene;
 let rolling = false;
 const diceContainer = document.getElementById("dice-container");
 
+eventBus.subscribe('rollDice', () => lancer());
+eventBus.subscribe('toggleDiceKeep', (diceIndex) => {
+    const dice = diceList[diceIndex];
+    if (dice) {
+        toggleDiceKeep(dice.diceMesh);
+    }
+});
+eventBus.subscribe('resetDiceKeep', () => {
+    diceList.forEach(d => {
+        if (d.diceMesh.isKept) {
+            toggleDiceKeep(d.diceMesh);
+        }
+    });
+});
+
 function setup3D() {
-    ({ scene, camera, renderer, world } = init3D(THREE, CANNON, OrbitControls, diceContainer));
+    ({ scene, camera, renderer, world } = init3D(THREE, CANNON, OrbitControls, document.getElementById('dice-container')));
 
     for (let i = 0; i < 3; i++) {
         let { diceBody, diceMesh } = createDice(THREE, CANNON, scene, world, i);
@@ -27,6 +41,8 @@ function setup3D() {
 
     animate();
 }
+
+import eventBus from './eventbus.js';
 
 window.lancer = function() {
     if (rolling) return;
@@ -42,7 +58,7 @@ window.lancer = function() {
     }
 
     diceToRoll.forEach((dice, i) => {
-        lancerDe(dice.diceBody, -1 + i * 1.1);
+        lancerDe(dice.diceBody, i);
     });
 
     // Reset kept status for the next turn after the roll
@@ -95,7 +111,6 @@ function handleStartGame() {
 }
 
 import { toggleDiceKeep } from "./dicemanager.js";
-window.toggleDiceKeep = toggleDiceKeep; // Make it globally accessible for AI
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();

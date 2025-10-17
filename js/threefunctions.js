@@ -52,9 +52,9 @@ export function init3D(THREE, CANNON, OrbitControls, container) {
 
 	// Responsive
 	window.addEventListener("resize", () => {
-		camera.aspect = container.clientWidth / container.clientHeight;
+		camera.aspect = window.innerWidth / window.innerHeight;
 		camera.updateProjectionMatrix();
-		renderer.setSize(container.clientWidth, container.clientHeight);
+		renderer.setSize(window.innerWidth, window.innerHeight);
 	});
 
 	return { scene, camera, renderer, world };

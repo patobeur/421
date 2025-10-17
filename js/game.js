@@ -1,6 +1,8 @@
 /**
  * Manages the game state and logic for the 421 game.
  */
+import eventBus from './eventbus.js';
+
 class Game {
     /**
      * @param {string[]} playerNames - An array of player names.
@@ -76,7 +78,7 @@ class Game {
                 <p class="score">Jetons: ${player.score}</p>
             `;
             if (this.players[this.currentPlayerIndex].name === player.name) {
-                playerDiv.style.borderColor = '#4CAF50';
+                playerDiv.setAttribute('data-current', 'true');
             }
             playersContainer.appendChild(playerDiv);
         });
@@ -90,6 +92,11 @@ class Game {
                 }
             });
         });
+
+        const isHumanTurn = !this.players[this.currentPlayerIndex].isAI;
+        document.getElementById('roll-dice-btn').disabled = !isHumanTurn;
+        document.getElementById('end-turn-btn').disabled = !isHumanTurn;
+
         console.log(`Jetons restants dans la pioche: ${this.tokens}`);
     }
 
@@ -109,7 +116,12 @@ class Game {
         const endOfPlayerTurn = (this.turnRolls >= 3);
 
         if (currentPlayer.isAI && !endOfPlayerTurn) {
-            this.playAITurn(diceValues);
+            try {
+                this.playAITurn(diceValues);
+            } catch (error) {
+                console.error("Erreur lors du tour de l'IA :", error);
+                this.nextPlayer(); // Skip AI turn on error
+            }
         } else if (endOfPlayerTurn) {
             this.turnScores[this.currentPlayerIndex] = combination;
             if (this.turnScores.filter(s => s).length === this.players.length) {
@@ -140,43 +152,52 @@ class Game {
         return 1; // Classique
     }
 
+    decideBestDiceToKeep(dice, counts) {
+        // Always keep 421
+        if (dice.includes(4) && dice.includes(2) && dice.includes(1)) {
+            return [4, 2, 1];
+        }
+
+        // Keep brelans
+        for (const [val, count] of Object.entries(counts)) {
+            if (count === 3) return [parseInt(val)];
+        }
+
+        // Keep pairs of aces, otherwise keep single ace
+        if (counts[1] >= 2) return [1, 1];
+        if (counts[1]) return [1];
+
+        // Keep other pairs
+        for (const [val, count] of Object.entries(counts)) {
+            if (count === 2) return [parseInt(val), parseInt(val)];
+        }
+
+        // Keep high dice
+        return [Math.max(...dice)];
+    }
+
     playAITurn(diceValues) {
         console.log(`${this.players[this.currentPlayerIndex].name} joue...`);
 
-        if (diceValues) { // If diceValues are provided, it's not the first roll of the turn
+        if (diceValues) {
             const counts = {};
             diceValues.forEach(d => counts[d] = (counts[d] || 0) + 1);
 
-            let toKeep = [];
-            if (diceValues.includes(4) && diceValues.includes(2) && diceValues.includes(1)) {
-                toKeep = [4, 2, 1];
-            } else {
-                if (counts[1]) toKeep.push(1);
-                if (counts[2] > 1) toKeep.push(2); else if (counts[2] && !toKeep.length) toKeep.push(2);
-                if (counts[4] > 1) toKeep.push(4); else if (counts[4] && !toKeep.length) toKeep.push(4);
+            let toKeep = this.decideBestDiceToKeep(diceValues, counts);
 
-                Object.keys(counts).forEach(key => {
-                    if (counts[key] > 1 && !toKeep.includes(parseInt(key))) {
-                        toKeep.push(parseInt(key));
-                    }
-                });
-            }
-
-            window.diceList.forEach((dice, index) => {
-                const diceValue = diceValues[index];
+            diceValues.forEach((diceValue, index) => {
                 const shouldKeep = toKeep.includes(diceValue);
-                if (shouldKeep && !dice.diceMesh.isKept) {
-                    window.toggleDiceKeep(dice.diceMesh);
+                // This logic needs to be improved to handle duplicate dice values
+                if (shouldKeep) {
+                    eventBus.publish('toggleDiceKeep', index);
                     toKeep.splice(toKeep.indexOf(diceValue), 1);
-                } else if (!shouldKeep && dice.diceMesh.isKept) {
-                    window.toggleDiceKeep(dice.diceMesh);
                 }
             });
         }
 
         setTimeout(() => {
-            window.lancer();
-        }, 1000);
+            eventBus.publish('rollDice');
+        }, 1500);
     }
 
     endRound() {
@@ -217,14 +238,7 @@ class Game {
     }
 
     nextPlayer() {
-        // Clear any kept dice visuals for the next player
-        if (window.diceList) {
-            window.diceList.forEach(d => {
-                if (d.diceMesh.isKept) {
-                    window.toggleDiceKeep(d.diceMesh);
-                }
-            });
-        }
+        eventBus.publish('resetDiceKeep');
 
         this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
         this.turnRolls = 0;
