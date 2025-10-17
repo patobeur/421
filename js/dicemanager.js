@@ -116,6 +116,7 @@ export function createDice(THREE, CANNON, scene, world, posY = 0) {
 
 	const geometry = new THREE.BoxGeometry(1, 1, 1);
 	const mesh = new THREE.Mesh(geometry, textures);
+	mesh.isKept = false; // Initial state
 
 	// Physique
 	const shape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
@@ -128,4 +129,12 @@ export function createDice(THREE, CANNON, scene, world, posY = 0) {
 	scene.add(mesh);
 
 	return { diceBody, diceMesh: mesh };
+}
+
+export function toggleDiceKeep(diceMesh) {
+    diceMesh.isKept = !diceMesh.isKept;
+    // We need to access the material array to change colors for each face
+    diceMesh.material.forEach(material => {
+        material.color.set(diceMesh.isKept ? 0x98FB98 : 0xffffff); // LightGreen for kept
+    });
 }

@@ -1,4 +1,4 @@
-export function init3D(THREE, CANNON, OrbitControls) {
+export function init3D(THREE, CANNON, OrbitControls, container) {
 	// SCENE
 	const scene = new THREE.Scene();
 	scene.background = new THREE.Color(0x222235);
@@ -6,7 +6,7 @@ export function init3D(THREE, CANNON, OrbitControls) {
 	// CAMERA
 	const camera = new THREE.PerspectiveCamera(
 		50,
-		window.innerWidth / window.innerHeight,
+		container.clientWidth / container.clientHeight,
 		0.1,
 		100
 	);
@@ -14,9 +14,9 @@ export function init3D(THREE, CANNON, OrbitControls) {
 	camera.lookAt(0, 0, 0);
 
 	// RENDERER
-	const renderer = new THREE.WebGLRenderer({ antialias: true });
-	renderer.setSize(window.innerWidth, window.innerHeight);
-	document.body.appendChild(renderer.domElement);
+	const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+	renderer.setSize(container.clientWidth, container.clientHeight);
+	container.appendChild(renderer.domElement);
 
 	// LIGHTS
 	const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -52,9 +52,9 @@ export function init3D(THREE, CANNON, OrbitControls) {
 
 	// Responsive
 	window.addEventListener("resize", () => {
-		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.aspect = container.clientWidth / container.clientHeight;
 		camera.updateProjectionMatrix();
-		renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.setSize(container.clientWidth, container.clientHeight);
 	});
 
 	return { scene, camera, renderer, world };

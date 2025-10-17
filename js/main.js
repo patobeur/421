@@ -11,55 +11,136 @@ import {
 	getTopFace,
 } from "./dicemanager.js";
 
-let diceList = []; // <--- Tableau de tous les dés
+let diceList = [];
+window.diceList = diceList; // Make it globally accessible for AI
 let world, renderer, camera, scene;
 let rolling = false;
+const diceContainer = document.getElementById("dice-container");
 
-function setup() {
-	({ scene, camera, renderer, world } = init3D(THREE, CANNON, OrbitControls));
+function setup3D() {
+    ({ scene, camera, renderer, world } = init3D(THREE, CANNON, OrbitControls, diceContainer));
 
-	// On crée 3 dés, espacés sur l’axe X
-	for (let i = 0; i < 3; i++) {
-		let x = -1 + i * 3; // -1, 0, +1 pour bien les voir
-		let { diceBody, diceMesh } = createDice(THREE, CANNON, scene, world, i);
-		diceList.push({ diceBody, diceMesh });
-	}
+    for (let i = 0; i < 3; i++) {
+        let { diceBody, diceMesh } = createDice(THREE, CANNON, scene, world, i);
+        diceList.push({ diceBody, diceMesh, id: i });
+    }
 
-	lancer();
-	animate();
+    animate();
 }
 
-function lancer() {
-	rolling = true;
-	document.getElementById("valeur-de").textContent = "";
-	diceList.forEach((dice, i) => {
-		lancerDe(dice.diceBody, -1 + i * 1.1); // Chaque dé lancé, positionné en X différent
-	});
+window.lancer = function() {
+    if (rolling) return;
+    rolling = true;
+    document.getElementById("dice-value").textContent = "";
+
+    let diceToRoll = diceList.filter(d => !d.diceMesh.isKept);
+    if (diceToRoll.length === 0) { // If all dice are kept, roll all
+        diceToRoll = diceList;
+        diceList.forEach(d => {
+            if(d.diceMesh.isKept) toggleDiceKeep(d.diceMesh);
+        });
+    }
+
+    diceToRoll.forEach((dice, i) => {
+        lancerDe(dice.diceBody, -1 + i * 1.1);
+    });
+
+    // Reset kept status for the next turn after the roll
+    setTimeout(() => {
+        diceList.forEach(d => {
+            if (d.diceMesh.isKept) {
+                // This is a visual cue, the actual game logic will handle the state
+            }
+        });
+    }, 1500); // Delay to allow user to see which dice were kept
 }
 
 function animate() {
-	requestAnimationFrame(animate);
-	updateGame(
-		world,
-		diceList.map((d) => d.diceBody)
-	);
-	diceList.forEach((dice) => syncDiceMeshBody(dice.diceMesh, dice.diceBody));
-	renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+    if (world && renderer && camera && scene) {
+        updateGame(world, diceList.map(d => d.diceBody));
+        diceList.forEach(dice => syncDiceMeshBody(dice.diceMesh, dice.diceBody));
+        renderer.render(scene, camera);
 
-	// Affichage de toutes les valeurs quand tous les dés sont stables
-	if (rolling && diceList.every((dice) => isDiceStopped(dice.diceBody))) {
-		rolling = false;
-		const tops = diceList.map((dice) => getTopFace(dice.diceMesh, THREE));
-		document.getElementById("valeur-de").textContent =
-			"Faces supérieures : " + tops.join(", ");
-		console.log("Faces supérieures :", tops);
-	}
+        if (rolling && diceList.every(dice => isDiceStopped(dice.diceBody))) {
+            rolling = false;
+            const tops = diceList.map(dice => getTopFace(dice.diceMesh, THREE));
+            document.getElementById("dice-value").textContent = "Résultat : " + tops.join(", ");
+            if (game) {
+                game.rollDice(tops);
+            }
+        }
+    }
 }
 
-window.addEventListener("keydown", (e) => {
-	if (e.code === "Space" && !rolling) {
-		lancer();
-	}
+import Game from './game.js';
+
+let game;
+
+function handleStartGame() {
+    const playerName = document.getElementById("player-name").value || "Joueur 1";
+    const aiCount = parseInt(document.getElementById("ai-count").value, 10);
+    const playerNames = [playerName];
+    for (let i = 0; i < aiCount; i++) {
+        playerNames.push(`IA ${i + 1}`);
+    }
+
+    game = new Game(playerNames);
+    game.start();
+
+    document.getElementById("settings-form").style.display = "none";
+    document.getElementById("game-area").style.display = "block";
+
+    setup3D();
+}
+
+import { toggleDiceKeep } from "./dicemanager.js";
+window.toggleDiceKeep = toggleDiceKeep; // Make it globally accessible for AI
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+function onMouseClick(event) {
+    if (!camera) return;
+
+    const canvasBounds = diceContainer.getBoundingClientRect();
+    mouse.x = ((event.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1;
+    mouse.y = -((event.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children);
+
+    if (intersects.length > 0) {
+        const intersectedMesh = intersects[0].object;
+        if (diceList.some(d => d.diceMesh === intersectedMesh)) {
+            toggleDiceKeep(intersectedMesh);
+        }
+    }
+}
+
+
+document.getElementById("start-game-btn").addEventListener("click", handleStartGame);
+document.getElementById("roll-dice-btn").addEventListener("click", lancer);
+document.getElementById("end-turn-btn").addEventListener("click", () => {
+    if (game) {
+        game.manualEndTurn();
+    }
+});
+document.getElementById("reset-game-btn").addEventListener("click", () => {
+    localStorage.removeItem('gameState421');
+    window.location.reload();
 });
 
-setup();
+diceContainer.addEventListener('click', onMouseClick, false);
+
+// On page load, check for saved game state
+window.addEventListener('load', () => {
+    game = new Game([]);
+    if (game.loadState()) {
+        console.log("Partie sauvegardée chargée.");
+        document.getElementById("settings-form").style.display = "none";
+        document.getElementById("game-area").style.display = "block";
+        setup3D();
+        game.updateUI();
+    }
+});
