@@ -35,6 +35,11 @@ export function createDice(THREE, CANNON, scene, world, index = 0) {
 	const diceBody = new CANNON.Body({ mass: 1, shape });
 	diceBody.position.set((index - 1) * 2, 5, 0);
 
+	// Allow the dice to sleep
+	diceBody.allowSleep = true;
+	diceBody.sleepSpeedLimit = 0.1;
+	diceBody.sleepTimeLimit = 1;
+
 	world.addBody(diceBody);
 	scene.add(mesh);
 
@@ -49,7 +54,7 @@ export function syncDiceMeshBody(mesh, body) {
 export function isDiceStopped(diceBody) {
 	const linear = diceBody.velocity.length();
 	const angular = diceBody.angularVelocity.length();
-	return linear < 0.05 && angular < 0.05 && diceBody.position.y < 1.1;
+	return linear < 0.05 && angular < 0.05;
 }
 
 export function getTopFace(mesh, THREE) {

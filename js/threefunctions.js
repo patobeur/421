@@ -33,6 +33,7 @@ export function init3D(THREE, CANNON, OrbitControls, container) {
 	const world = new CANNON.World({
 		gravity: new CANNON.Vec3(0, -9.82, 0),
 	});
+	world.allowSleep = true;
 
 	// SOL physique (Cannon)
 	const groundBody = new CANNON.Body({
@@ -78,6 +79,7 @@ export function init3D(THREE, CANNON, OrbitControls, container) {
 }
 
 export function lancerDe(diceBody, index = 0) {
+	diceBody.wakeUp();
 	diceBody.position.set((index - 1) * 2.5, 4 + Math.random() * 2, (index - 1) * (Math.random() - 0.5) * 2);
 	diceBody.velocity.set(
 		(Math.random() - 0.5) * 10,

@@ -18,7 +18,8 @@ const settingsModal = document.getElementById('settings-modal');
 // --- Initialization ---
 function init() {
     console.log("Initializing application");
-    game = new Game(updateUI, aiRoll);
+    const getDiceValues = () => diceList.map(d => getTopFace(d.diceMesh, THREE));
+    game = new Game(updateUI, aiRoll, getDiceValues);
     setupEventListeners();
     if (game.loadState()) {
         console.log("Saved game loaded.");
@@ -77,7 +78,10 @@ function setup3DScene() {
 
 function lancer(keptDiceValues = []) {
     if (rolling) return;
-    if (game) game.turnRolls++;
+    if (game) {
+        game.turnRolls++;
+        updateUI(game.getState()); // Update UI to enable/disable buttons
+    }
     rolling = true;
 
     diceList.forEach(d => {
@@ -109,18 +113,16 @@ function animate() {
         diceList.forEach(dice => syncDiceMeshBody(dice.diceMesh, dice.diceBody));
         renderer.render(scene, camera);
 
-        if (rolling && diceList.every(dice => isDiceStopped(dice.diceBody))) {
-            rolling = false;
-            const tops = diceList.map(dice => getTopFace(dice.diceMesh, THREE));
-            console.log("Dice stopped. Values:", tops);
-            if (game) {
-                game.handleRollResult(tops);
-            }
-        }
+        // The game logic is now decoupled from the animation loop
     }
 }
 
 function updateUI(gameState) {
+    // Reset the rolling flag at the start of a new turn
+    if (gameState.turnRolls === 0) {
+        rolling = false;
+    }
+
     const playersContainer = document.getElementById('players-container');
     const playerNamesSetup = document.getElementById('player-names-setup');
 

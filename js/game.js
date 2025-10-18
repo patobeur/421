@@ -1,7 +1,8 @@
 class Game {
-    constructor(updateUI, aiRollCallback) {
+    constructor(updateUI, aiRollCallback, getDiceValuesCallback) {
         this.updateUI = updateUI;
         this.aiRoll = aiRollCallback;
+        this.getDiceValues = getDiceValuesCallback;
         this.players = [];
         this.tokens = 11;
         this.currentPlayerIndex = 0;
@@ -72,13 +73,13 @@ class Game {
         const combination = this.evaluateCombination(this.lastRoll);
         this.diceValue = `${combination.name} (${this.getTokensForCombination(combination)} fiches)`;
 
-        if (this.players[this.currentPlayerIndex].isAI || this.turnRolls >= 3) {
-            this.endTurn();
-        }
         this.updateUI(this.getState());
     }
 
     endTurn() {
+        const finalDice = this.getDiceValues();
+        this.handleRollResult(finalDice);
+
         const combination = this.evaluateCombination(this.lastRoll);
         this.turnScores[this.currentPlayerIndex] = combination;
         this.message = `${this.players[this.currentPlayerIndex].name} termine son tour avec un ${combination.name}.`;
@@ -125,22 +126,40 @@ class Game {
         this.turnScores.fill(null);
         this.updateUI(this.getState());
         this.saveState();
-        setTimeout(() => this.takeTurn(), 2000);
+        this.takeTurn();
     }
 
     playAITurn() {
         console.log("AI is thinking...");
-        this.turnRolls++;
 
-        if (this.turnRolls > 1) {
-            const counts = {};
-            this.lastRoll.forEach(d => counts[d] = (counts[d] || 0) + 1);
-            this.keptDice = this.decideBestDiceToKeep(this.lastRoll, counts);
-        }
+        const rollAndDecide = () => {
+            if (this.turnRolls >= 3) {
+                this.endTurn();
+                return;
+            }
 
-        setTimeout(() => {
+            this.turnRolls++;
             this.aiRoll(this.keptDice);
-        }, 1500);
+
+            setTimeout(() => {
+                const currentRoll = this.getDiceValues();
+                this.handleRollResult(currentRoll);
+
+                const counts = {};
+                currentRoll.forEach(d => counts[d] = (counts[d] || 0) + 1);
+                this.keptDice = this.decideBestDiceToKeep(currentRoll, counts);
+
+                // Simple AI logic: if it has a good hand, stop. Otherwise, roll again.
+                const combination = this.evaluateCombination(currentRoll);
+                if (combination.rank > 600 && this.turnRolls > 1) { // Good enough hand
+                    this.endTurn();
+                } else {
+                    rollAndDecide(); // Roll again
+                }
+            }, 2000); // Time for visual roll
+        };
+
+        rollAndDecide();
     }
 
     decideBestDiceToKeep(dice, counts) {
