@@ -1,9 +1,17 @@
 /* General Body Styles */
+:root {
+    --primary-color: #4CAF50;
+    --dark-bg: rgba(26, 26, 26, 0.8);
+    --light-text: #f0f0f0;
+    --border-color: rgba(255, 255, 255, 0.2);
+}
+
 body {
-    font-family: 'Arial', sans-serif;
-    color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--light-text);
     margin: 0;
-    overflow: hidden; /* Hide scrollbars */
+    overflow: hidden;
+    background-color: #1a1a1a;
 }
 
 #dice-container {
@@ -12,7 +20,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1; /* Place it behind everything */
+    z-index: -1;
 }
 
 canvas {
@@ -21,64 +29,167 @@ canvas {
     height: 100%;
 }
 
-/* Game Container */
-#game-container {
-    width: 100%;
-    max-width: 500px;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 12px;
-    background: rgba(0, 0, 0, 0.6);
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    background: var(--dark-bg);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    border-bottom: 1px solid var(--border-color);
+    height: 60px;
 }
 
-/* Header Styles */
-h1, h2 {
-    color: #fff;
+.navbar-brand {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand .logo {
+    font-size: 2em;
+    margin-right: 10px;
+}
+
+.navbar-brand h1 {
+    font-size: 1.5em;
+    margin: 0;
+}
+
+/* Dropdown Menu */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    background: var(--primary-color);
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: var(--dark-bg);
+    min-width: 200px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1000;
+    border-radius: 5px;
+    padding: 10px 0;
+}
+
+.dropdown-menu a {
+    color: var(--light-text);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-menu a:hover {
+    background-color: var(--primary-color);
+}
+
+.dropdown-menu .separator {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 8px 0;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+
+/* Game Layout */
+#game-layout {
+    display: flex;
+    height: calc(100vh - 60px);
+}
+
+#game-main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+}
+
+#players-sidebar {
+    width: 300px;
+    background: var(--dark-bg);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-left: 1px solid var(--border-color);
+    overflow-y: auto;
+}
+
+#players-sidebar h2 {
     text-align: center;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    margin-top: 0;
+    border-bottom: 1px solid var(--primary-color);
+    padding-bottom: 10px;
 }
 
-/* Player and AI Areas */
 .player-area {
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid transparent;
     padding: 15px;
     margin-bottom: 15px;
     border-radius: 8px;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
     transition: all 0.3s ease;
+}
+
+.player-area[data-current="true"] {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
 }
 
 .player-area h3 {
     margin-top: 0;
+    display: flex;
+    justify-content: space-between;
 }
 
-.player-area[data-current="true"] {
-    border-color: #4CAF50;
-    box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+.player-area .rolls-left {
+    font-size: 0.8em;
+    font-style: italic;
+    color: #ccc;
 }
 
-/* Score and Tokens */
-.score {
+/* Message Area */
+#message-area {
+    background: var(--dark-bg);
+    padding: 15px 30px;
+    border-radius: 10px;
+    margin-bottom: 20px;
     font-size: 1.2em;
-    font-weight: bold;
-    color: #f0f0f0;
+    text-align: center;
+    border: 1px solid var(--border-color);
 }
 
-#dice-value {
+#dice-value-display {
     text-align: center;
-    font-size: 1.5em;
+    font-size: 1.3em;
     margin: 20px 0;
     font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    min-height: 30px;
 }
 
-/* Buttons */
-.game-controls button {
-    background-color: #4CAF50;
+/* Game Controls */
+#game-controls {
+    display: flex;
+    justify-content: center;
+}
+
+#game-controls button {
+    background-color: var(--primary-color);
     color: white;
     padding: 12px 24px;
     border: none;
@@ -87,34 +198,47 @@ h1, h2 {
     font-size: 1em;
     margin: 5px;
     transition: background-color 0.3s, transform 0.2s;
-    width: calc(50% - 10px);
 }
 
-.game-controls button:hover {
+#game-controls button:hover {
     background-color: #45a049;
     transform: scale(1.05);
 }
 
-.game-controls button:disabled {
+#game-controls button:disabled {
     background-color: #555;
     color: #999;
     cursor: not-allowed;
     transform: scale(1);
 }
 
-/* Settings Form */
-#settings-form {
-    margin-bottom: 20px;
-}
-
-#settings-form label {
-    display: block;
-    margin-bottom: 8px;
-}
-
-#settings-form input[type="text"],
-#settings-form select {
+/* Settings Modal */
+.modal {
+    display: none; /* Hidden by default */
+    display: flex;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
     width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #2b2b2b;
+    padding: 30px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+}
+
+#player-names-setup input {
+    width: calc(100% - 20px);
     padding: 10px;
     margin-bottom: 15px;
     border-radius: 5px;
@@ -123,23 +247,22 @@ h1, h2 {
     color: #333;
 }
 
-.rename-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0 5px;
-    font-size: 0.8em;
+#start-game-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2em;
 }
 
-/* Responsive Design */
-@media (max-width: 600px) {
-    #game-container {
-        margin: 10px;
-        padding: 15px;
+/* Responsive */
+@media (max-width: 768px) {
+    #game-layout {
+        flex-direction: column;
     }
-
-    .game-controls button {
+    #players-sidebar {
         width: 100%;
-        margin: 5px 0;
+        height: auto;
+        max-height: 40vh;
+        border-left: none;
+        border-top: 1px solid var(--border-color);
     }
 }

@@ -1,161 +1,219 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import * as CANNON from "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js";
+import Game from './game.js';
+import { init3D, lancerDe, updateGame } from "./threefunctions.js";
+import { createDice, syncDiceMeshBody, isDiceStopped, getTopFace, toggleDiceKeep } from "./dicemanager.js";
 
-import { init3D } from "./threefunctions.js";
-import { lancerDe, updateGame } from "./gamefunctions.js";
-import {
-	createDice,
-	syncDiceMeshBody,
-	isDiceStopped,
-	getTopFace,
-} from "./dicemanager.js";
-
+// --- Global variables ---
 let diceList = [];
 let world, renderer, camera, scene;
 let rolling = false;
-const diceContainer = document.getElementById("dice-container");
+let game;
 
-eventBus.subscribe('rollDice', () => lancer());
-eventBus.subscribe('toggleDiceKeep', (diceIndex) => {
-    const dice = diceList[diceIndex];
-    if (dice) {
-        toggleDiceKeep(dice.diceMesh);
+// --- DOM Elements ---
+const diceContainer = document.getElementById("dice-container");
+const settingsModal = document.getElementById('settings-modal');
+
+// --- Initialization ---
+function init() {
+    console.log("Initializing application");
+    game = new Game(updateUI, aiRoll);
+    setupEventListeners();
+    if (game.loadState()) {
+        console.log("Saved game loaded.");
+        startGame();
+    } else {
+        showSettingsModal();
     }
-});
-eventBus.subscribe('resetDiceKeep', () => {
-    diceList.forEach(d => {
-        if (d.diceMesh.isKept) {
-            toggleDiceKeep(d.diceMesh);
+}
+
+function showSettingsModal() {
+    console.log("Showing settings modal");
+    if (!game) {
+        game = new Game(updateUI, aiRoll);
+    }
+
+    if (game.players.length === 0) {
+        game.addPlayer();
+        game.addAI();
+    }
+
+    game.isGameInProgress = false;
+    updateUI(game.getState());
+    settingsModal.style.display = 'flex';
+}
+
+function startGame() {
+    console.log("Starting game...");
+    const nameInputs = document.querySelectorAll('#player-names-setup .player-name-input');
+    nameInputs.forEach(input => {
+        const index = parseInt(input.getAttribute('data-index'));
+        const newName = input.value;
+        if (game.players[index] && newName) {
+            game.renamePlayer(index, newName);
         }
     });
-});
 
-function setup3D() {
-    ({ scene, camera, renderer, world } = init3D(THREE, CANNON, OrbitControls, document.getElementById('dice-container')));
+    settingsModal.style.display = 'none';
+    game.start();
+    updateUI(game.getState());
 
+    if (!scene) {
+        setup3DScene();
+    }
+}
+
+function setup3DScene() {
+    console.log("Setting up 3D scene");
+    ({ scene, camera, renderer, world } = init3D(THREE, CANNON, OrbitControls, diceContainer));
+    diceList = [];
     for (let i = 0; i < 3; i++) {
         let { diceBody, diceMesh } = createDice(THREE, CANNON, scene, world, i);
         diceList.push({ diceBody, diceMesh, id: i });
     }
-
     animate();
 }
 
-import eventBus from './eventbus.js';
-
-window.lancer = function() {
+function lancer(keptDiceValues = []) {
     if (rolling) return;
+    if (game) game.turnRolls++;
     rolling = true;
-    document.getElementById("dice-value").textContent = "";
 
-    let diceToRoll = diceList.filter(d => !d.diceMesh.isKept);
-    if (diceToRoll.length === 0) { // If all dice are kept, roll all
-        diceToRoll = diceList;
+    diceList.forEach(d => {
+        if (d.diceMesh.isKept) toggleDiceKeep(d.diceMesh);
+    });
+
+    const keptDiceMeshes = [];
+    if (keptDiceValues.length > 0) {
         diceList.forEach(d => {
-            if(d.diceMesh.isKept) toggleDiceKeep(d.diceMesh);
+            const topFace = getTopFace(d.diceMesh, THREE);
+            if (keptDiceValues.includes(topFace) && !keptDiceMeshes.some(k => k === d.diceMesh)) {
+                 toggleDiceKeep(d.diceMesh);
+                 keptDiceMeshes.push(d.diceMesh);
+            }
         });
     }
+
+    let diceToRoll = diceList.filter(d => !d.diceMesh.isKept);
 
     diceToRoll.forEach((dice, i) => {
         lancerDe(dice.diceBody, i);
     });
-
-    // Reset kept status for the next turn after the roll
-    setTimeout(() => {
-        diceList.forEach(d => {
-            if (d.diceMesh.isKept) {
-                // This is a visual cue, the actual game logic will handle the state
-            }
-        });
-    }, 1500); // Delay to allow user to see which dice were kept
 }
 
 function animate() {
     requestAnimationFrame(animate);
     if (world && renderer && camera && scene) {
-        updateGame(world, diceList.map(d => d.diceBody));
+        updateGame(world);
         diceList.forEach(dice => syncDiceMeshBody(dice.diceMesh, dice.diceBody));
         renderer.render(scene, camera);
 
         if (rolling && diceList.every(dice => isDiceStopped(dice.diceBody))) {
             rolling = false;
             const tops = diceList.map(dice => getTopFace(dice.diceMesh, THREE));
-            document.getElementById("dice-value").textContent = "Résultat : " + tops.join(", ");
+            console.log("Dice stopped. Values:", tops);
             if (game) {
-                game.rollDice(tops);
+                game.handleRollResult(tops);
             }
         }
     }
 }
 
-import Game from './game.js';
+function updateUI(gameState) {
+    const playersContainer = document.getElementById('players-container');
+    const playerNamesSetup = document.getElementById('player-names-setup');
 
-let game;
+    playersContainer.innerHTML = '';
+    if(playerNamesSetup) playerNamesSetup.innerHTML = '';
 
-function handleStartGame() {
-    const playerName = document.getElementById("player-name").value || "Joueur 1";
-    const aiCount = parseInt(document.getElementById("ai-count").value, 10);
-    const playerNames = [playerName];
-    for (let i = 0; i < aiCount; i++) {
-        playerNames.push(`IA ${i + 1}`);
+    gameState.players.forEach((player, index) => {
+        const playerDiv = document.createElement('div');
+        playerDiv.className = 'player-area';
+        if (gameState.isGameInProgress && index === gameState.currentPlayerIndex) {
+            playerDiv.setAttribute('data-current', 'true');
+        }
+
+        let renameButtonHTML = !gameState.isGameInProgress ? `<button class="rename-btn" data-index="${index}">✏️</button>` : '';
+        let rollsLeftHTML = (gameState.isGameInProgress && index === gameState.currentPlayerIndex && gameState.turnRolls > 0) ? `<span class="rolls-left">${3 - gameState.turnRolls} lancers restants</span>` : '';
+
+        playerDiv.innerHTML = `
+            <h3>${player.name} ${renameButtonHTML} ${rollsLeftHTML}</h3>
+            <p class="score">Jetons: ${player.score}</p>
+        `;
+        playersContainer.appendChild(playerDiv);
+
+        if (!gameState.isGameInProgress && playerNamesSetup) {
+             playerNamesSetup.innerHTML += `<div><label>${player.isAI ? 'IA' : 'Joueur'} ${index + 1}:</label><input type="text" class="player-name-input" data-index="${index}" value="${player.name}"></div>`;
+        }
+    });
+
+    if (!gameState.isGameInProgress) {
+        document.querySelectorAll('.rename-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const playerIndex = e.target.getAttribute('data-index');
+                const newName = prompt("Entrez le nouveau nom :", gameState.players[playerIndex].name);
+                if (newName) {
+                    game.renamePlayer(playerIndex, newName);
+                }
+            });
+        });
     }
 
-    game = new Game(playerNames);
-    game.start();
-
-    document.getElementById("settings-form").style.display = "none";
-    document.getElementById("game-area").style.display = "block";
-
-    setup3D();
+    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+    document.getElementById('roll-dice-btn').disabled = !gameState.isGameInProgress || !currentPlayer || currentPlayer.isAI;
+    document.getElementById('end-turn-btn').disabled = !gameState.isGameInProgress || !currentPlayer || currentPlayer.isAI || gameState.turnRolls === 0;
+    document.getElementById('message-text').innerText = gameState.message;
+    document.getElementById('dice-value-display').innerText = gameState.diceValue;
 }
 
-import { toggleDiceKeep } from "./dicemanager.js";
-
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
+function aiRoll(keptDice) {
+    lancer(keptDice);
+}
 
 function onMouseClick(event) {
-    if (!camera) return;
+    if (!camera || !game || !game.isGameInProgress || game.players[game.currentPlayerIndex].isAI) return;
 
     const canvasBounds = diceContainer.getBoundingClientRect();
+    const mouse = new THREE.Vector2();
     mouse.x = ((event.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1;
     mouse.y = -((event.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1;
 
+    const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(scene.children);
 
     if (intersects.length > 0) {
         const intersectedMesh = intersects[0].object;
-        if (diceList.some(d => d.diceMesh === intersectedMesh)) {
-            toggleDiceKeep(intersectedMesh);
+        const clickedDice = diceList.find(d => d.diceMesh === intersectedMesh);
+        if (clickedDice) {
+            console.log(`Dice ${clickedDice.id} clicked.`);
+            toggleDiceKeep(clickedDice.diceMesh);
         }
     }
 }
 
+function setupEventListeners() {
+    console.log("Setting up event listeners");
+    document.getElementById("start-game-btn").addEventListener("click", startGame);
+    document.getElementById("roll-dice-btn").addEventListener("click", () => {
+        if (game && game.isGameInProgress && !game.players[game.currentPlayerIndex].isAI) {
+            lancer();
+        }
+    });
+    document.getElementById("end-turn-btn").addEventListener("click", () => {
+        if (game && game.isGameInProgress && !game.players[game.currentPlayerIndex].isAI) {
+            game.endTurn();
+        }
+    });
+    document.getElementById("new-game-btn").addEventListener("click", showSettingsModal);
+    document.getElementById("add-player-btn").addEventListener("click", () => game ? game.addPlayer() : null);
+    document.getElementById("remove-player-btn").addEventListener("click", () => game ? game.removePlayer() : null);
+    document.getElementById("add-ai-btn").addEventListener("click", () => game ? game.addAI() : null);
+    document.getElementById("remove-ai-btn").addEventListener("click", () => game ? game.removeAI() : null);
 
-document.getElementById("start-game-btn").addEventListener("click", handleStartGame);
-document.getElementById("roll-dice-btn").addEventListener("click", lancer);
-document.getElementById("end-turn-btn").addEventListener("click", () => {
-    if (game) {
-        game.manualEndTurn();
-    }
-});
-document.getElementById("reset-game-btn").addEventListener("click", () => {
-    localStorage.removeItem('gameState421');
-    window.location.reload();
-});
+    diceContainer.addEventListener('click', onMouseClick, false);
+}
 
-diceContainer.addEventListener('click', onMouseClick, false);
-
-// On page load, check for saved game state
-window.addEventListener('load', () => {
-    game = new Game([]);
-    if (game.loadState()) {
-        console.log("Partie sauvegardée chargée.");
-        document.getElementById("settings-form").style.display = "none";
-        document.getElementById("game-area").style.display = "block";
-        setup3D();
-        game.updateUI();
-    }
-});
+// --- App Entry Point ---
+init();

@@ -6,7 +6,7 @@ export function init3D(THREE, CANNON, OrbitControls, container) {
 	// CAMERA
 	const camera = new THREE.PerspectiveCamera(
 		50,
-		container.clientWidth / container.clientHeight,
+		window.innerWidth / window.innerHeight,
 		0.1,
 		100
 	);
@@ -14,8 +14,8 @@ export function init3D(THREE, CANNON, OrbitControls, container) {
 	camera.lookAt(0, 0, 0);
 
 	// RENDERER
-	const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-	renderer.setSize(container.clientWidth, container.clientHeight);
+	const renderer = new THREE.WebGLRenderer({ antialias: true });
+	renderer.setSize(window.innerWidth, window.innerHeight);
 	container.appendChild(renderer.domElement);
 
 	// LIGHTS
@@ -44,11 +44,28 @@ export function init3D(THREE, CANNON, OrbitControls, container) {
 	world.addBody(groundBody);
 
 	// SOL visuel (Three)
-	const groundGeometry = new THREE.PlaneGeometry(10, 10);
-	const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x384c69 });
+	const groundGeometry = new THREE.PlaneGeometry(20, 20);
+	const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x384c69, transparent: true, opacity: 0.5 });
 	const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
 	groundMesh.rotation.x = -Math.PI / 2;
 	scene.add(groundMesh);
+
+    // Murs invisibles
+    const wallMaterial = new CANNON.Material('wallMaterial');
+    const wallShape = new CANNON.Plane();
+    const wallPositions = [
+        { position: new CANNON.Vec3(0, 0, -10), quaternion: new CANNON.Vec3(0, 1, 0) }, // Back
+        { position: new CANNON.Vec3(0, 0, 10), quaternion: new CANNON.Vec3(0, -1, 0) }, // Front
+        { position: new CANNON.Vec3(-10, 0, 0), quaternion: new CANNON.Vec3(1, 0, 0) }, // Left
+        { position: new CANNON.Vec3(10, 0, 0), quaternion: new CANNON.Vec3(-1, 0, 0) }  // Right
+    ];
+
+    wallPositions.forEach(config => {
+        const wallBody = new CANNON.Body({ mass: 0, shape: wallShape, material: wallMaterial });
+        wallBody.position.copy(config.position);
+        wallBody.quaternion.setFromAxisAngle(config.quaternion, Math.PI / 2);
+        world.addBody(wallBody);
+    });
 
 	// Responsive
 	window.addEventListener("resize", () => {
@@ -60,15 +77,25 @@ export function init3D(THREE, CANNON, OrbitControls, container) {
 	return { scene, camera, renderer, world };
 }
 
-export function getRenderer() {
-	return renderer;
+export function lancerDe(diceBody, index = 0) {
+	diceBody.position.set((index - 1) * 2.5, 4 + Math.random() * 2, (index - 1) * (Math.random() - 0.5) * 2);
+	diceBody.velocity.set(
+		(Math.random() - 0.5) * 10,
+		6 + Math.random() * 4,
+		(Math.random() - 0.5) * 10
+	);
+	diceBody.angularVelocity.set(
+		(Math.random() - 0.5) * 30,
+		(Math.random() - 0.5) * 30,
+		(Math.random() - 0.5) * 30
+	);
+	diceBody.quaternion.setFromEuler(
+		Math.random() * Math.PI * 2,
+		Math.random() * Math.PI * 2,
+		Math.random() * Math.PI * 2
+	);
 }
-export function getCamera() {
-	return camera;
-}
-export function getScene() {
-	return scene;
-}
-export function animateScene() {
-	/* Si besoin d’un animate global */
+
+export function updateGame(world) {
+    world.step(1/60);
 }
