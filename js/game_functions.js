@@ -4,9 +4,9 @@ export function lancerDe(diceBody) {
 
 	diceBody.velocity.set(-(5 + Math.random() * 3), 0, -(5 + Math.random() * 3));
 	diceBody.angularVelocity.set(
-		(Math.random() - 0.5) * 2,
-		(Math.random() - 0.5) * 2,
-		(Math.random() - 0.5) * 2
+		(Math.random() - 0.5) * 15,
+		(Math.random() - 0.5) * 15,
+		(Math.random() - 0.5) * 15
 	);
 	diceBody.quaternion.setFromEuler(
 		Math.random() * Math.PI,

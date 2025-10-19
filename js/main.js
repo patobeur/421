@@ -14,16 +14,27 @@ import {
 } from "./dice_functions.js";
 
 let diceList = []; // <--- Tableau de tous les dés
-let world, renderer, camera, scene;
+let world, renderer, camera, scene, diceMaterial;
 let rolling = false;
 
 function setup() {
-	({ scene, camera, renderer, world } = init3D(THREE, CANNON, OrbitControls));
+	({ scene, camera, renderer, world, diceMaterial } = init3D(
+		THREE,
+		CANNON,
+		OrbitControls
+	));
 
 	// On crée 3 dés, espacés sur l’axe X
 	for (let i = 0; i < 3; i++) {
 		let x = -1 + i * 3; // -1, 0, +1 pour bien les voir
-		let { diceBody, diceMesh } = createDice(THREE, CANNON, scene, world, i);
+		let { diceBody, diceMesh } = createDice(
+			THREE,
+			CANNON,
+			scene,
+			world,
+			diceMaterial,
+			i
+		);
 		diceList.push({ diceBody, diceMesh });
 	}
 	console.log(pseudoMaker(5));
