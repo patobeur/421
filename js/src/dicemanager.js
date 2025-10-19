@@ -111,7 +111,7 @@ export function createDice(THREE, CANNON, scene, world, posY = 0) {
 	for (let i = 1; i <= 6; i++) {
 		const canvas = createTextTexture(i);
 		const texture = new THREE.CanvasTexture(canvas);
-		textures.push(new THREE.MeshStandardMaterial({ map: texture }));
+		textures.push(new THREE.MeshLambertMaterial({ map: texture }));
 	}
 
 	const geometry = new THREE.BoxGeometry(1, 1, 1);

@@ -2,27 +2,40 @@
 <html lang="fr">
 	<head>
 		<meta charset="UTF-8" />
-		<link rel="icon" href="data:;base64,iVBORw0KGgo=" />
-		<title>Dé 3D avec Three.js & Cannon-es</title>
-		<style>
-			body {
-				margin: 0;
-				overflow: hidden;
-			}
-			#valeur-de {
-				position: absolute;
-				top: 15px;
-				left: 20px;
-				color: #fff;
-				font-size: 2em;
-				background: rgba(0, 0, 0, 0.5);
-				padding: 8px 18px;
-				border-radius: 10px;
-			}
-		</style>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>421</title>
+		<link rel="stylesheet" href="css/style.css" />
 	</head>
 	<body>
-		<div id="valeur-de"></div>
+		<div id="game-container">
+			<canvas id="three-canvas"></canvas>
+			<div id="ui-overlay">
+				<h1>421</h1>
+				<div id="game-menu">
+					<div class="menu-section">
+						<label for="player-name">Nom du joueur :</label>
+						<input type="text" id="player-name" value="Joueur 1" />
+					</div>
+					<div class="menu-section">
+						<label for="ai-count">Nombre d'IA :</label>
+						<select id="ai-count">
+							<option value="1">1</option>
+							<option value="2" selected>2</option>
+						</select>
+					</div>
+					<div id="ai-names"></div>
+					<button id="start-game">Commencer</button>
+				</div>
+				<div id="game-interface" style="display: none">
+					<div id="players-info"></div>
+					<div id="game-state"></div>
+					<div id="dice-container"></div>
+                    <div id="roll-info"></div>
+					<button id="roll-dice">Lancer les dés</button>
+					<button id="end-turn">Fin du tour</button>
+				</div>
+			</div>
+		</div>
 		<script
 			async
 			src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
@@ -34,6 +47,6 @@
 				}
 			}
 		</script>
-		<script type="module" src="js/main.js"></script>
+		<script type="module" src="js/src/main.js"></script>
 	</body>
 </html>

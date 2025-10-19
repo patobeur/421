@@ -1,67 +1,71 @@
-html,
 body {
-	margin: 0;
-	padding: 0;
-	background: #232323;
-	color: white;
-	font-family: sans-serif;
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    color: white;
+    background-color: #1a1a1a;
 }
-#ui {
-	position: absolute;
-	left: 20px;
-	top: 20px;
-	z-index: 10;
-	background: rgba(30, 30, 30, 0.9);
-	padding: 16px;
-	border-radius: 10px;
-	box-shadow: 0 2px 8px #0006;
-	min-width: 300px;
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
-#canvas {
-	display: block;
-	width: 100vw;
-	height: 100vh;
+
+#three-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
 }
-#playersList span {
-	margin-right: 1em;
-	padding: 2px 6px;
-	border-radius: 5px;
-	background: #333;
-	border: 1px solid #444;
-	display: inline-block;
-	margin-bottom: 3px;
+
+#ui-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
 }
-.joueurActif {
-	background: #00aaff;
-	color: #fff;
-	border: 1px solid #fff;
+
+#game-menu, #game-interface {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
 }
-#diceHint {
-	color: #ccc;
-	margin-top: 8px;
-	font-size: 13px;
+
+.menu-section {
+    margin-bottom: 15px;
 }
-#roll,
-#startGame,
-#nextTurn,
-#phaseNext {
-	margin: 6px 0;
-	padding: 7px 20px;
-	font-size: 1em;
-	border-radius: 6px;
-	border: none;
-	background: #005f5f;
-	color: #fff;
-	cursor: pointer;
+
+#ai-names input {
+    margin-top: 5px;
 }
-#roll[disabled],
-#nextTurn[disabled] {
-	opacity: 0.6;
-	cursor: not-allowed;
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    margin-top: 10px;
 }
-#scores {
-	margin-top: 8px;
+
+button:hover {
+    background-color: #0056b3;
 }
-.diceFige {
-	outline: 3px solid #ffff00 !important;
+
+.active {
+    font-weight: bold;
+    color: #ffc107;
 }
