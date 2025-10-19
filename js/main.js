@@ -12,6 +12,7 @@ import {
 	isDiceStopped,
 	getTopFace,
 } from "./dice_functions.js";
+import { getCombination } from "./rules_421.js";
 
 let diceList = []; // <--- Tableau de tous les dés
 let world, renderer, camera, scene, diceMaterial;
@@ -64,9 +65,9 @@ function animate() {
 	if (rolling && diceList.every((dice) => isDiceStopped(dice.diceBody))) {
 		rolling = false;
 		const tops = diceList.map((dice) => getTopFace(dice.diceMesh, THREE));
-
-		UI.resultats_des.textContent = "" + tops.join(", ");
-		console.log("tops :", tops);
+		const combination = getCombination(tops);
+		UI.resultats_des.textContent = `${combination.name} (${combination.score} points)`;
+		console.log("tops :", tops, "combination :", combination);
 	}
 }
 
