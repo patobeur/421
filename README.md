@@ -1,14 +1,14 @@
 🎲 Prompt HTML / Three.js / Cannon-es – Dé 6 faces avec physique réaliste
 
-    Crée une page HTML avec un dé à 6 faces (type D6) en 3D utilisant Three.js et Cannon-es.
+    Crée une page HTML avec 3 dés à 6 faces (type D6) en 3D utilisant Three.js et Cannon-es.
 
     Fonctionnalités souhaitées :
 
-        Le dé tombe dans la scène avec une rotation aléatoire depuis une certaine hauteur (réglable).
+        Le dés sont lancés dans la scène comme s'il etait jeté par l'utilisateur(trice) avec une rotation aléatoire depuis une certaine hauteur (réglable).
 
-        Il rebondit sur un sol physique, puis finit par s’arrêter naturellement grâce à la physique (4 murs invisibles enmpeche les des de sortir du rond central).
+        les dés rebondissent sur un sol physique, puis finissent par s’arrêter naturellement grâce à la physique. Une sphere semi-invisible empeche les dés de sortir de la vue du joueur. (en prod la sphere sera invisible, les des pourront entrer dedans mais pas en sortir)
 
-        Une fois que le dé est immobile, sa valeur (face du dessus) est affichée dans la console ou sur l'écran.
+        Une fois que le dés sont immobiles, leur valeur (face du dessus) est affichée à l'écran du plus grand au plus petit.
 
     Contraintes techniques :
 
@@ -18,13 +18,7 @@
 
         Avoir un fichier main.js importé via <script type="module">.
 
-        Le projet utilise des fichiers séparés :
-
-            threefunctions.js pour la scène, lumière, caméra, etc.
-
-            gamefunctions.js pour la logique de partie.
-
-            dicemanager.js pour tout ce qui concerne les dés (création, animation, calcul face supérieure).
+        Le projet utilise des fichiers séparés pour chaque logique.
 
         Le mouvement doit être fluide et réaliste, avec collisions et rebonds.
 
@@ -32,7 +26,7 @@
 
 🎲 annexes
 
-    pour le index.html
+    pour le index.html (mettre à jour avec les dernieres versions le cas écheant)
 
     ```bash
     	<script
@@ -49,7 +43,7 @@
     	<script type="module" src="js/main.js"></script>
     ```
 
-    et ceci pour le debut des fichiers .js
+    et ceci pour le debut des fichiers .js (mettre à jour avec les dernieres versions le cas écheant)
 
     ```bash
     import _ as THREE from "three";
