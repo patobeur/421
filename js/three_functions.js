@@ -10,7 +10,7 @@ export function init3D(THREE, CANNON, OrbitControls) {
 		0.1,
 		100
 	);
-	camera.position.set(6, 6, 6);
+	camera.position.set(6, 10, 6);
 	camera.lookAt(0, 0, 0);
 
 	// RENDERER
