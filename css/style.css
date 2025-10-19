@@ -29,6 +29,19 @@ html {
     color: white;
 }
 
+#final-score-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px 40px;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    font-size: 2.5em;
+    border-radius: 15px;
+    text-align: center;
+}
+
 #players_div {
 	position: absolute;
 	top: 5px;

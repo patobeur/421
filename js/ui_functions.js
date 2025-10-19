@@ -69,6 +69,11 @@ const UI = {
             style: { display: 'none' },
             append: document.body,
         });
+        this.finalScoreMessage = this.createDiv({
+            attributes: { id: 'final-score-message' },
+            style: { display: 'none' },
+            append: document.body,
+        });
 	},
 	createDiv: function (params) {
 		let element = document.createElement(params.tag ?? "div");

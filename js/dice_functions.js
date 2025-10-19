@@ -10,7 +10,7 @@ export function syncDiceMeshBody(mesh, body) {
 export function isDiceStopped(diceBody) {
 	const linear = diceBody.velocity.length();
 	const angular = diceBody.angularVelocity.length();
-	return linear < 0.05 && angular < 0.05 && diceBody.position.y < 1.1;
+	return linear < 0.1 && angular < 0.1 && diceBody.position.y < 1.1;
 }
 
 // Trouver la face supérieure grâce au quaternion du mesh

@@ -18,6 +18,8 @@ let diceList = []; // <--- Tableau de tous les dés
 let world, renderer, camera, scene, diceMaterial;
 let rolling = false;
 let lancerCount = 0;
+let isTurnOver = true; // Le jeu commence avec un tour "terminé" pour forcer le premier lancer
+let awaitingNextTurn = false;
 
 function setup() {
 	({ scene, camera, renderer, world, diceMaterial } = init3D(
@@ -42,29 +44,38 @@ function setup() {
 	console.log(pseudoMaker(5));
 	UI.init();
     UI.validateButton.addEventListener('click', endTurn);
-	lancer();
+	//lancer(); // On ne lance plus automatiquement
 	animate();
 }
 
 function endTurn() {
     UI.validateButton.style.display = 'none';
-    lancerCount = 0;
-    diceList.forEach((dice) => {
-        dice.locked = false;
-        dice.diceMesh.material.forEach((material) => {
-            material.emissive.setHex(0x000000);
-        });
-    });
-    // On pourrait ajouter ici la logique pour passer au joueur suivant
-    console.log("Tour terminé. Prêt pour le prochain tour.");
+    isTurnOver = true;
+    awaitingNextTurn = true;
+
+    // Afficher le message de score final
+    const tops = diceList.map((dice) => getTopFace(dice.diceMesh, THREE));
+    const combination = getCombination(tops);
+    UI.finalScoreMessage.textContent = `Score : ${combination.score} points\nFigure : ${combination.name}`;
+    UI.finalScoreMessage.style.display = 'block';
 }
 
 function lancer() {
+    if (awaitingNextTurn) {
+        // C'est un nouveau tour
+        lancerCount = 0;
+        diceList.forEach((dice) => {
+            dice.locked = false;
+            dice.diceMesh.material.forEach((material) => {
+                material.emissive.setHex(0x000000);
+            });
+        });
+        isTurnOver = false;
+        awaitingNextTurn = false;
+        UI.finalScoreMessage.style.display = 'none';
+    }
+
     UI.validateButton.style.display = 'none';
-	// Si le tour est terminé (3 lancers), on le réinitialise avant de commencer le nouveau tour
-	if (lancerCount >= 3) {
-        endTurn();
-	}
 
 	lancerCount++;
 	rolling = true;
@@ -94,58 +105,65 @@ function animate() {
 		UI.resultats_des.textContent = `${combination.name} (${combination.score} points)`;
 		console.log("tops :", tops, "combination :", combination);
 
-        if (lancerCount === 1 || lancerCount === 2) {
+        if (lancerCount === 3) {
+            endTurn();
+        } else if (!isTurnOver) {
             UI.validateButton.style.display = 'block';
         }
 	}
 }
 
+function handleUserAction() {
+    if (awaitingNextTurn && !rolling) {
+        lancer();
+    } else if (!rolling) {
+        lancer();
+    }
+}
+
 window.addEventListener("keydown", (e) => {
-	if (e.code === "Space" && !rolling) {
-		lancer();
+	if (e.code === "Space") {
+		handleUserAction();
 	}
 });
 
-window.addEventListener("mousedown", onDiceClick, false);
+window.addEventListener("mousedown", (event) => {
+    // Si le tour est terminé, un clic n'importe où lance un nouveau tour
+    if (awaitingNextTurn) {
+        handleUserAction();
+        return;
+    }
 
-function onDiceClick(event) {
-	const mouse = new THREE.Vector2();
-	mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-	mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    // Si le tour est en cours, on tente de locker un dé
+    const mouse = new THREE.Vector2();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-	const raycaster = new THREE.Raycaster();
-	raycaster.setFromCamera(mouse, camera);
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children, true);
 
-	const intersects = raycaster.intersectObjects(scene.children, true);
+    if (intersects.length > 0) {
+        const clickedObject = intersects[0].object;
+        const dice = diceList.find((d) => d.diceMesh === clickedObject);
+        if (dice) {
+            toggleLock(dice);
+        }
+    }
+});
 
-	if (intersects.length > 0) {
-		const clickedObject = intersects[0].object;
-		const dice = diceList.find((d) => d.diceMesh === clickedObject);
+function toggleLock(dice) {
+    if (lancerCount === 0 || isTurnOver) return;
 
-		if (dice) {
-			// On ne peut pas locker les dés avant le premier lancer
-			if (lancerCount === 0) return;
+    const lockedCount = diceList.filter((d) => d.locked).length;
+    if (!dice.locked && lockedCount >= 2) return;
 
-			const lockedCount = diceList.filter((d) => d.locked).length;
+    dice.locked = !dice.locked;
 
-			// Si le dé n'est pas déjà locké et qu'on a déjà 2 dés lockés, on ne fait rien
-			if (!dice.locked && lockedCount >= 2) return;
-
-			// Inverser l'état de lock
-			dice.locked = !dice.locked;
-
-			// Changer l'apparence du dé
-			if (dice.locked) {
-				dice.diceMesh.material.forEach((material) => {
-					material.emissive.setHex(0x555555);
-				});
-			} else {
-				dice.diceMesh.material.forEach((material) => {
-					material.emissive.setHex(0x000000);
-				});
-			}
-		}
-	}
+    dice.diceMesh.material.forEach((material) => {
+        material.emissive.setHex(dice.locked ? 0x555555 : 0x000000);
+    });
+    }
 }
 
 window.addEventListener("DOMContentLoaded", setup);
