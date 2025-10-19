@@ -4,7 +4,6 @@ const UI = {
 		// type = 1/human or 0/IA
 		{ id: 0, pseudo: "Alice", fiches: 0, type: 1 },
 		{ id: 1, pseudo: "IA_Bob", fiches: 0, type: 0 },
-		{ id: 2, pseudo: "IA_Charles", fiches: 0, type: 0 },
 	],
 	players_divs: [],
 	add_ia: function () {
