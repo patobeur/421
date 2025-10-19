@@ -33,7 +33,7 @@ function setup() {
 
 function lancer() {
 	rolling = true;
-	UI.button_lancer_les_des.textContent = "";
+	UI.resultats_des.textContent = "";
 	diceList.forEach((dice, i) => {
 		lancerDe(dice.diceBody, -1 + i * 1.1); // Chaque dé lancé, positionné en X différent
 	});
@@ -53,9 +53,8 @@ function animate() {
 		rolling = false;
 		const tops = diceList.map((dice) => getTopFace(dice.diceMesh, THREE));
 
-		UI.button_lancer_les_des.textContent =
-			"Faces supérieures : " + tops.join(", ");
-		console.log("Faces supérieures :", tops);
+		UI.resultats_des.textContent = "" + tops.join(", ");
+		console.log("tops :", tops);
 	}
 }
 

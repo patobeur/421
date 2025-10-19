@@ -8,7 +8,44 @@ html {
 }
 #valeur-de {
 	position: absolute;
-	top: 15px;
+	bottom: 5px;
+	right: 5px;
+	color: #fff;
+	font-size: 2em;
+	padding: 8px 18px;
+	border-radius: 10px;
+}
+
+#players_div {
+	position: absolute;
+	top: 5px;
+	left: 5px;
+	display: flex;
+	flex-direction: column;
+}
+.player_div {
+	margin: 5px;
+	display: flex;
+	/* justify-content: center;
+	align-items: center; */
+	flex-direction: column;
+	background-color: rgb(221, 220, 218);
+	padding: 4px 9px;
+	border-radius: 9px;
+}
+.player_div.active {
+	background-color: rgb(255, 170, 0);
+}
+#players_div_pseudo {
+	color: #fff;
+	font-size: 2em;
+	background: rgba(0, 0, 0, 0.5);
+	padding: 8px 18px;
+	border-radius: 10px;
+}
+#fiches_restantes {
+	position: absolute;
+	bottom: 15px;
 	left: 20px;
 	color: #fff;
 	font-size: 2em;

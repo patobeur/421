@@ -1,7 +1,6 @@
 export function lancerDe(diceBody) {
-	console.log("eeee", diceBody);
 	// Reset la position et vélocité du dé
-	diceBody.position.set(3, 3, diceBody.id * 1);
+	diceBody.position.set(3, 3, diceBody.index * 2);
 	diceBody.velocity.set(-(5 + Math.random() * 3), 0, -(5 + Math.random() * 3));
 	diceBody.angularVelocity.set(
 		(Math.random() - 0.5) * 25,

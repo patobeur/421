@@ -50,6 +50,17 @@ export function init3D(THREE, CANNON, OrbitControls) {
 	groundMesh.rotation.x = -Math.PI / 2;
 	scene.add(groundMesh);
 
+	// Murs physique (Three)
+	const wallGeometry = new THREE.PlaneGeometry(10, 10);
+	const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+	const wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
+	wallMesh.position.set(0, 5, -5);
+	scene.add(wallMesh);
+	const wallMesh2 = new THREE.Mesh(wallGeometry, wallMaterial);
+	wallMesh2.position.set(-5, 5, 0);
+	wallMesh2.rotation.y = Math.PI / 2;
+	scene.add(wallMesh2);
+
 	// Responsive
 	window.addEventListener("resize", () => {
 		camera.aspect = window.innerWidth / window.innerHeight;
@@ -68,7 +79,4 @@ export function getCamera() {
 }
 export function getScene() {
 	return scene;
-}
-export function animateScene() {
-	/* Si besoin d’un animate global */
 }

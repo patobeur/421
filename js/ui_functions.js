@@ -1,10 +1,60 @@
 const UI = {
+	current_player: 0,
+	players: [
+		// type = human or IA
+		{ id: 0, pseudo: "Alice", fiches: 0, type: 0 },
+		{ id: 1, pseudo: "Bob", fiches: 0, type: 1 },
+		{ id: 2, pseudo: "Charles", fiches: 0, type: 1 },
+	],
+	players_divs: [],
 	init: function () {
-		this.button_lancer_les_des = this.createDiv({
+		this.resultats_des = this.createDiv({
 			attributes: { textContent: "...", id: "valeur-de" },
 			append: document.body,
 		});
-		// document.body.appendChild(this.button_lancer_les_des);
+		this.players_div = this.createDiv({
+			attributes: { id: "players_div" },
+			append: document.body,
+		});
+		this.players.forEach((player) => {
+			let player_div = this.createDiv({
+				attributes: {
+					className:
+						"player_div" +
+						(player.id === this.current_player ? " active" : ""),
+				},
+				append: this.players_div,
+			});
+			let pseudo_div = this.createDiv({
+				attributes: {
+					textContent: player.pseudo,
+					className: "pseudo_div",
+				},
+				append: player_div,
+			});
+			let fiches_div = this.createDiv({
+				attributes: {
+					textContent:
+						player.fiches + " fiche" + (player.fiches > 1 ? "s" : ""),
+					className: "fiches_div",
+				},
+				append: player_div,
+			});
+			this.players_divs[player.id] = {
+				player_div: player_div,
+				pseudo_div: pseudo_div,
+				fiches_div: fiches_div,
+			};
+		});
+
+		// this.players_div_pseudo = this.createDiv({
+		// 	attributes: { textContent: "Alice", id: "players_div_pseudo" },
+		// 	append: this.players_div,
+		// });
+		this.fiches_restantes = this.createDiv({
+			attributes: { textContent: "Fiches : 11", id: "fiches_restantes" },
+			append: document.body,
+		});
 	},
 	createDiv: function (params) {
 		let element = document.createElement(params.tag ?? "div");
@@ -50,6 +100,7 @@ const UI = {
 		return element;
 	},
 	setStepBackgroundImage: function () {
+		//en attente d'une image gratuit d'un plateau de jeu de dés rond vue du dessus.
 		this.stepBoardDiv.style.backgroundImage = "url('')";
 	},
 };
