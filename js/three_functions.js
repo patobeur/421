@@ -61,6 +61,22 @@ export function init3D(THREE, CANNON, OrbitControls) {
 	wallMesh2.rotation.y = Math.PI / 2;
 	scene.add(wallMesh2);
 
+	const wallShape = new CANNON.Box(new CANNON.Vec3(5, 5, 0.1));
+	const wallBody = new CANNON.Body({
+		type: CANNON.Body.STATIC,
+		shape: wallShape,
+		position: new CANNON.Vec3(0, 5, -5),
+	});
+	world.addBody(wallBody);
+
+	const wallBody2 = new CANNON.Body({
+		type: CANNON.Body.STATIC,
+		shape: wallShape,
+		position: new CANNON.Vec3(-5, 5, 0),
+	});
+	wallBody2.quaternion.setFromEuler(0, Math.PI / 2, 0);
+	world.addBody(wallBody2);
+
 	// Responsive
 	window.addEventListener("resize", () => {
 		camera.aspect = window.innerWidth / window.innerHeight;
