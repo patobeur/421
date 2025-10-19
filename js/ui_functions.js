@@ -63,6 +63,12 @@ const UI = {
 			attributes: { textContent: "Fiches : 11", id: "fiches_restantes" },
 			append: document.body,
 		});
+        this.validateButton = this.createDiv({
+            tag: 'button',
+            attributes: { textContent: "Valider le score", id: "validate-score-btn" },
+            style: { display: 'none' },
+            append: document.body,
+        });
 	},
 	createDiv: function (params) {
 		let element = document.createElement(params.tag ?? "div");

@@ -16,6 +16,19 @@ html {
 	border-radius: 10px;
 }
 
+#validate-score-btn {
+    position: absolute;
+    bottom: 80px;
+    left: 20px;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    cursor: pointer;
+    border-radius: 8px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+}
+
 #players_div {
 	position: absolute;
 	top: 5px;

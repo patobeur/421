@@ -41,21 +41,29 @@ function setup() {
 	}
 	console.log(pseudoMaker(5));
 	UI.init();
+    UI.validateButton.addEventListener('click', endTurn);
 	lancer();
 	animate();
 }
 
+function endTurn() {
+    UI.validateButton.style.display = 'none';
+    lancerCount = 0;
+    diceList.forEach((dice) => {
+        dice.locked = false;
+        dice.diceMesh.material.forEach((material) => {
+            material.emissive.setHex(0x000000);
+        });
+    });
+    // On pourrait ajouter ici la logique pour passer au joueur suivant
+    console.log("Tour terminé. Prêt pour le prochain tour.");
+}
+
 function lancer() {
+    UI.validateButton.style.display = 'none';
 	// Si le tour est terminé (3 lancers), on le réinitialise avant de commencer le nouveau tour
 	if (lancerCount >= 3) {
-		lancerCount = 0;
-		diceList.forEach((dice) => {
-			dice.locked = false;
-			// On remet la couleur normale
-			dice.diceMesh.material.forEach((material) => {
-				material.emissive.setHex(0x000000);
-			});
-		});
+        endTurn();
 	}
 
 	lancerCount++;
@@ -85,6 +93,10 @@ function animate() {
 		const combination = getCombination(tops);
 		UI.resultats_des.textContent = `${combination.name} (${combination.score} points)`;
 		console.log("tops :", tops, "combination :", combination);
+
+        if (lancerCount === 1 || lancerCount === 2) {
+            UI.validateButton.style.display = 'block';
+        }
 	}
 }
 
@@ -111,8 +123,8 @@ function onDiceClick(event) {
 		const dice = diceList.find((d) => d.diceMesh === clickedObject);
 
 		if (dice) {
-			// On ne peut pas locker les dés au premier lancer
-			if (lancerCount === 1) return;
+			// On ne peut pas locker les dés avant le premier lancer
+			if (lancerCount === 0) return;
 
 			const lockedCount = diceList.filter((d) => d.locked).length;
 
