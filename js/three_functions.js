@@ -10,7 +10,7 @@ export function init3D(THREE, CANNON, OrbitControls) {
 		0.1,
 		100
 	);
-	camera.position.set(6, 10, 6);
+	camera.position.set(1, 20, 10);
 	camera.lookAt(0, 0, 0);
 
 	// RENDERER
@@ -26,7 +26,7 @@ export function init3D(THREE, CANNON, OrbitControls) {
 
 	// ORBIT CONTROLS
 	const controls = new OrbitControls(camera, renderer.domElement);
-	controls.target.set(0, 0, 0);
+	// controls.target.set(0, 0, 0);
 	controls.update();
 
 	// CANNON WORLD
@@ -44,14 +44,14 @@ export function init3D(THREE, CANNON, OrbitControls) {
 	world.addBody(groundBody);
 
 	// SOL visuel (Three)
-	const groundGeometry = new THREE.PlaneGeometry(10, 10);
+	const groundGeometry = new THREE.PlaneGeometry(20, 20);
 	const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x384c69 });
 	const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
 	groundMesh.rotation.x = -Math.PI / 2;
 	scene.add(groundMesh);
 
 	// Murs physique (Three)
-	const wallGeometry = new THREE.PlaneGeometry(10, 10);
+	const wallGeometry = new THREE.PlaneGeometry(20, 20);
 	const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
 	const wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
 	wallMesh.position.set(0, 5, -5);

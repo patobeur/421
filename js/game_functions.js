@@ -1,12 +1,12 @@
 export function lancerDe(diceBody) {
 	// Reset la position et vélocité du dé
-	diceBody.position.set(3, 2, -5 + diceBody.index * 2);
+	diceBody.position.set(4, diceBody.index * 1.2, diceBody.index * 1.2);
 
 	diceBody.velocity.set(-(5 + Math.random() * 3), 0, -(5 + Math.random() * 3));
 	diceBody.angularVelocity.set(
-		(Math.random() - 0.5) * 5,
-		(Math.random() - 0.5) * 5,
-		(Math.random() - 0.5) * 5
+		(Math.random() - 0.5) * 2,
+		(Math.random() - 0.5) * 2,
+		(Math.random() - 0.5) * 2
 	);
 	diceBody.quaternion.setFromEuler(
 		Math.random() * Math.PI,
