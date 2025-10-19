@@ -5,6 +5,7 @@ import * as CANNON from "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cann
 import { init3D } from "./three_functions.js";
 import { lancerDe, updateGame } from "./game_functions.js";
 import { UI } from "./ui_functions.js";
+import { pseudoMaker } from "./pseudoMaker_functions.js";
 import {
 	createDice,
 	syncDiceMeshBody,
@@ -25,7 +26,7 @@ function setup() {
 		let { diceBody, diceMesh } = createDice(THREE, CANNON, scene, world, i);
 		diceList.push({ diceBody, diceMesh });
 	}
-
+	console.log(pseudoMaker(5));
 	UI.init();
 	lancer();
 	animate();
