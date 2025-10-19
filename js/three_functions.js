@@ -34,11 +34,34 @@ export function init3D(THREE, CANNON, OrbitControls) {
 		gravity: new CANNON.Vec3(0, -9.82, 0),
 	});
 
+	// MATERIALS
+	const groundMaterial = new CANNON.Material("groundMaterial");
+	const diceMaterial = new CANNON.Material("diceMaterial");
+	const contactMaterial = new CANNON.ContactMaterial(
+		groundMaterial,
+		diceMaterial,
+		{
+			friction: 0.05,
+			restitution: 0.2,
+		}
+	);
+	world.addContactMaterial(contactMaterial);
+	const diceDiceContactMaterial = new CANNON.ContactMaterial(
+		diceMaterial,
+		diceMaterial,
+		{
+			friction: 0.05,
+			restitution: 0.2,
+		}
+	);
+	world.addContactMaterial(diceDiceContactMaterial);
+
 	// SOL physique (Cannon)
 	const groundBody = new CANNON.Body({
 		type: CANNON.Body.STATIC,
 		shape: new CANNON.Plane(),
 		position: new CANNON.Vec3(0, 0, 0),
+		material: groundMaterial,
 	});
 	groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
 	world.addBody(groundBody);
@@ -66,6 +89,7 @@ export function init3D(THREE, CANNON, OrbitControls) {
 		type: CANNON.Body.STATIC,
 		shape: wallShape,
 		position: new CANNON.Vec3(0, 5, -5),
+		material: groundMaterial,
 	});
 	world.addBody(wallBody);
 
@@ -73,6 +97,7 @@ export function init3D(THREE, CANNON, OrbitControls) {
 		type: CANNON.Body.STATIC,
 		shape: wallShape,
 		position: new CANNON.Vec3(-5, 5, 0),
+		material: groundMaterial,
 	});
 	wallBody2.quaternion.setFromEuler(0, Math.PI / 2, 0);
 	world.addBody(wallBody2);
@@ -84,7 +109,7 @@ export function init3D(THREE, CANNON, OrbitControls) {
 		renderer.setSize(window.innerWidth, window.innerHeight);
 	});
 
-	return { scene, camera, renderer, world };
+	return { scene, camera, renderer, world, diceMaterial };
 }
 
 export function getRenderer() {

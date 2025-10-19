@@ -65,7 +65,14 @@ function createTextTexture(number, size = 256) {
 	return canvas;
 }
 
-export function createDice(THREE, CANNON, scene, world, posY = 0) {
+export function createDice(
+	THREE,
+	CANNON,
+	scene,
+	world,
+	diceMaterial,
+	posY = 0
+) {
 	// Création des textures pour chaque face
 	const textures = [];
 	for (let i = 1; i <= 6; i++) {
@@ -79,10 +86,10 @@ export function createDice(THREE, CANNON, scene, world, posY = 0) {
 
 	// Physique
 	const shape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
-	const diceBody = new CANNON.Body({ mass: 1, shape });
+	const diceBody = new CANNON.Body({ mass: 1, shape, material: diceMaterial });
 	diceBody.position.set(0, 5 + posY * 8, 0);
-	// diceBody.angularDamping = 0.2;
-	// diceBody.linearDamping = 0.1;
+	diceBody.angularDamping = 0.4;
+	diceBody.linearDamping = 0.4;
 
 	world.addBody(diceBody);
 	scene.add(mesh);
