@@ -1,12 +1,21 @@
 const UI = {
 	current_player: 0,
 	players: [
-		// type = human or IA
-		{ id: 0, pseudo: "Alice", fiches: 0, type: 0 },
-		{ id: 1, pseudo: "Bob", fiches: 0, type: 1 },
-		{ id: 2, pseudo: "Charles", fiches: 0, type: 1 },
+		// type = 1/human or 0/IA
+		{ id: 0, pseudo: "Alice", fiches: 0, type: 1 },
+		{ id: 1, pseudo: "IA_Bob", fiches: 0, type: 0 },
+		{ id: 2, pseudo: "IA_Charles", fiches: 0, type: 0 },
 	],
 	players_divs: [],
+	add_ia: function () {
+		let new_id = this.players.length + 1;
+		this.players.push({
+			id: new_id,
+			pseudo: "IA_" + new_id,
+			fiches: 0,
+			type: 0,
+		});
+	},
 	init: function () {
 		this.resultats_des = this.createDiv({
 			attributes: { textContent: "...", id: "valeur-de" },
