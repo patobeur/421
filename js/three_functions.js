@@ -68,8 +68,10 @@ export function init3D(THREE, CANNON, OrbitControls) {
 
 	// SOL visuel (Three)
 	const groundGeometry = new THREE.PlaneGeometry(20, 20);
-	const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x384c69 });
-	const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
+	const groundMeshMaterial = new THREE.MeshStandardMaterial({
+		color: 0x384c69,
+	});
+	const groundMesh = new THREE.Mesh(groundGeometry, groundMeshMaterial);
 	groundMesh.rotation.x = -Math.PI / 2;
 	scene.add(groundMesh);
 
